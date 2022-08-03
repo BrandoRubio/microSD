@@ -2,38 +2,8 @@
 #include <ArduinoJson.h>
 
 AsyncWebServer server(80);
-/*
-  void serverSetup(){
-
-  Serial.print("IP address:\t");
-  Serial.println(WiFi.localIP());
-  }*/
 
 void serverSetup() {
-  server.on("/a", HTTP_GET, [](AsyncWebServerRequest * request) {
-    AsyncResponseStream *response = request->beginResponseStream("application/json");
-    DynamicJsonDocument json(1024);
-    int paramsNr = request->params();
-    for (int i = 0; i < paramsNr; i++) {
-      AsyncWebParameter* p = request->getParam(i);
-      /*if (p->name() == "ssid") {
-        ssidN = p->value();
-        }
-        if (p->name() == "password") {
-        passN = p->value();
-        }*/
-    }
-
-    serializeJson(json, *response);
-    response->addHeader("Access-Control-Allow-Origin", "*");
-    request->send(response);
-
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Change         ");
-    lcd.setCursor(0, 1);
-    lcd.print("Network        ");
-  });
   server.on("/checkDevice", HTTP_GET, [](AsyncWebServerRequest * request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);

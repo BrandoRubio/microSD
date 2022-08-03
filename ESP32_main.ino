@@ -7,7 +7,6 @@ void setup()
   setupConductivity();
   ubi_controlSetup();
   ubi_mainSetup();
-  //serverSetup();
 }
 
 void loop()

@@ -174,6 +174,7 @@ void testFileIO(fs::FS &fs, const char * path) {
 }
 
 void setupSD() {
+  
   if (!SD.begin()) {
     Serial.println("Card Mount Failed");
     return;

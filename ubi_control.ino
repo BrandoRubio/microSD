@@ -1,17 +1,20 @@
 #define VARIABLE_LABEL_SUB_1 "control1"    // Assing the variable label to subscribe
+/*
 #define VARIABLE_LABEL_SUB_2 "control2"   // Assing the variable label to subscribe
-#define VARIABLE_LABEL_SUB_3 "control3"   // Assing the variable label to subscribe
+#define VARIABLE_LABEL_SUB_3 "control3"   // Assing the variable label to subscribe*/
 
 #define R1 2
 #define R2 4
 //#define R3 4
+int valorEncendido = 0;
+int valorApagado = 1;
 
-const uint8_t NUMBER_OF_VARIABLES = 3;                                                                                                            // Number of variable to subscribe to
-char *variable_labels[NUMBER_OF_VARIABLES] = {"control1", "control2", "control3"}; // labels of the variable to subscribe to
+const uint8_t NUMBER_OF_VARIABLES = 1;// Number of variable to subscribe to
+char *variable_labels[NUMBER_OF_VARIABLES] = {"control1"/*, "control2", "control3"*/}; // labels of the variable to subscribe to
 
 float CONTROL1;  // Name of the variable to be used within the code.
-float CONTROL2;  // Name of the variable to be used within the code.
-float CONTROL3;  // Name of the variable to be used within the code.
+/*float CONTROL2;  // Name of the variable to be used within the code.
+float CONTROL3;  // Name of the variable to be used within the code.*/
 
 float value;      // To store incoming value.
 uint8_t variable; // To keep track of the state machine and be able to use the switch case.
@@ -33,9 +36,9 @@ void callback(char *topic, byte *payload, unsigned int length)
   value = btof(payload, length);
   set_state(variable_label);
   if (value == 1) {
-    value = 0;
+    value = valorEncendido;
   } else if (value == 0) {
-    value = 1;
+    value = valorApagado;
   }
   execute_cases();
   free(variable_label);
@@ -104,16 +107,16 @@ void execute_cases()
       CONTROL1 = value;
       digitalWrite(R1, value);
       digitalWrite(R2, value);
-      if (value == 1) {
-        BlowerState = false;
-      }else{
+      if (value == valorEncendido) {
         BlowerState = true;
+      }else if(value == valorApagado){
+        BlowerState = false;
       }
       Serial.print("CONTROL1: ");
       Serial.println(CONTROL1);
       Serial.println();
       break;
-    case 1:
+    /*case 1:
       CONTROL2 = value;
       digitalWrite(R2, value);
       digitalWrite(R1, value);
@@ -127,7 +130,7 @@ void execute_cases()
       Serial.print("CONTROL3: ");
       Serial.println(CONTROL3);
       Serial.println();
-      break;
+      break;*/
     case ERROR_VALUE:
       Serial.println("error");
       Serial.println();

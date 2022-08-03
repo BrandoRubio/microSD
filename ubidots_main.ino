@@ -398,14 +398,14 @@ void showLocalValues() {
     {
       if (BlowerState) {
         if (ubidots.connected()) {
-          ubidots.add("control1", 0);
+          ubidots.add("control1", valorEncendido);
           ubidots.publish(DEVICE_LABEL);
         }
         digitalWrite(R2, HIGH);
         digitalWrite(R1, HIGH);
       } else {
         if (ubidots.connected()) {
-          ubidots.add("control1", 1);
+          ubidots.add("control1", valorApagado);
           ubidots.publish(DEVICE_LABEL);
         }
         digitalWrite(R1, LOW);
