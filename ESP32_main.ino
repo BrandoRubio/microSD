@@ -5,6 +5,7 @@ void setup()
   setupSD();
   setupClock();
   setupConductivity();
+  setuptemperatura();
   ubi_controlSetup();
   ubi_mainSetup();
 }

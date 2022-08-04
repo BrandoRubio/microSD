@@ -1,81 +1,74 @@
-#include <OneWire.h>
-#include <DallasTemperature.h>
 
+#define TdsSensorPin 35
+#define VREF 5.0              // analog reference voltage(Volt) of the ADC
+#define SCOUNT  30            // sum of sample point
 
-#define TdsSensorPin 36
-#define VREF 5.0      // analog reference voltage(Volt) of the ADC
-#define SCOUNT  30
-
-
-int analogBuffer[SCOUNT];    // store the analog value in the array, read from ADC
+int analogBuffer[SCOUNT];     // store the analog value in the array, read from ADC
 int analogBufferTemp[SCOUNT];
-int analogBufferIndex = 0, copyIndex = 0;
-float averageVoltage = 0, tdsValue = 0, temperature = 25;
-float temp = 0;
+int analogBufferIndex = 0;
+int copyIndex = 0;
 
+float averageVoltage = 0;
+float tdsValue = 0;
+float temperature = 25;       // current temperature for compensation
 
-OneWire ourWireBus1(39);                  //Se establece el pin 4  como bus OneWire
-DallasTemperature sensor1(&ourWireBus1); //Se declara una variable u objeto para nuestro sensor
-
-void setupConductivity()
-{
-  pinMode(TdsSensorPin, INPUT);
-  sensor1.begin();   //Se inicia el sensor
-}
-
-void conductivityLoop() {
-  static unsigned long analogSampleTimepoint = millis();
-  if (millis() - analogSampleTimepoint > 40U)  //every 40 milliseconds,read the analog value from the ADC
-  {
-    analogSampleTimepoint = millis();
-    analogBuffer[analogBufferIndex] = analogRead(TdsSensorPin);    //read the analog value and store into the buffer
-    analogBufferIndex++;
-    if (analogBufferIndex == SCOUNT)
-      analogBufferIndex = 0;
-  }
-
-  static unsigned long printTimepoint = millis();
-  if (millis() - printTimepoint > 800U)
-  {
-    printTimepoint = millis();
-    for (copyIndex = 0; copyIndex < SCOUNT; copyIndex++)
-      analogBufferTemp[copyIndex] = analogBuffer[copyIndex];
-    averageVoltage = getMedianNum(analogBufferTemp, SCOUNT) * (float)VREF / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
-    float compensationCoefficient = 1.0 + 0.02 * (temperature - 25.0); //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
-    float compensationVolatge = averageVoltage / compensationCoefficient; //temperature compensation
-    tdsValue = (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5; //convert voltage value to tds value
-
-    //tdsValue = (tdsValue * 0.025509483) - 10;
-    tdsValue = random(0,50);
-  }
-
-  sensor1.requestTemperatures();   //Se envía el comando para leer la temperatura
-  temp = sensor1.getTempCByIndex(0); //Se obtiene la temperatura en ºC
-  //temp = random(0,50); //Se obtiene la temperatura en ºC
-}
-
-
-int getMedianNum(int bArray[], int iFilterLen)
-{
+// median filtering algorithm
+int getMedianNum(int bArray[], int iFilterLen){
   int bTab[iFilterLen];
-  for (byte i = 0; i < iFilterLen; i++)
-    bTab[i] = bArray[i];
+  for (byte i = 0; i<iFilterLen; i++)
+  bTab[i] = bArray[i];
   int i, j, bTemp;
-  for (j = 0; j < iFilterLen - 1; j++)
-  {
-    for (i = 0; i < iFilterLen - j - 1; i++)
-    {
-      if (bTab[i] > bTab[i + 1])
-      {
+  for (j = 0; j < iFilterLen - 1; j++) {
+    for (i = 0; i < iFilterLen - j - 1; i++) {
+      if (bTab[i] > bTab[i + 1]) {
         bTemp = bTab[i];
         bTab[i] = bTab[i + 1];
         bTab[i + 1] = bTemp;
       }
     }
   }
-  if ((iFilterLen & 1) > 0)
+  if ((iFilterLen & 1) > 0){
     bTemp = bTab[(iFilterLen - 1) / 2];
-  else
+  }
+  else {
     bTemp = (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
+  }
   return bTemp;
+}
+
+void setupConductivity(){
+  pinMode(TdsSensorPin,INPUT);
+}
+
+float conductivityLoop(){
+  static unsigned long analogSampleTimepoint = millis();
+  if(millis()-analogSampleTimepoint > 40U){     //every 40 milliseconds,read the analog value from the ADC
+    analogSampleTimepoint = millis();
+    analogBuffer[analogBufferIndex] = analogRead(TdsSensorPin);    //read the analog value and store into the buffer
+    analogBufferIndex++;
+    if(analogBufferIndex == SCOUNT){ 
+      analogBufferIndex = 0;
+    }
+  }   
+  
+  static unsigned long printTimepoint = millis();
+  if(millis()-printTimepoint > 800U){
+    printTimepoint = millis();
+    for(copyIndex=0; copyIndex<SCOUNT; copyIndex++){
+      analogBufferTemp[copyIndex] = analogBuffer[copyIndex];
+      
+      // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+      averageVoltage = getMedianNum(analogBufferTemp,SCOUNT) * (float)VREF / 4096.0;
+      
+      //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0)); 
+      float compensationCoefficient = 1.0+0.02*(temperature-25.0);
+      //temperature compensation
+      float compensationVoltage=averageVoltage/compensationCoefficient;
+      
+      //convert voltage value to tds value
+      tdsValue=(133.42*compensationVoltage*compensationVoltage*compensationVoltage - 255.86*compensationVoltage*compensationVoltage + 857.39*compensationVoltage)*0.5;
+      
+    }
+  }
+  return tdsValue;
 }
