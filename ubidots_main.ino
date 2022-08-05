@@ -23,8 +23,8 @@ int minTemp = 0;
 int maxTemp = 0;
 int minPH = 0;
 int maxPH = 0;
+float temp = 0;
 boolean flag21 = false;
-
 #define TOKEN "BBFF-R2QwDHPW5ap3FLDh2Q8A9Pv9iJXeNn"  //Token relacionado con el dispositivo Ubidots
 
 
@@ -60,9 +60,8 @@ void ubi_mainSetup() {
   maxTemp = preferences.getUInt("max");
   preferences.end();
 
-  //printAllPreferences();
+  printAllPreferences();
   pinMode(bocina, OUTPUT);
-
   pinMode(btnServer, INPUT_PULLUP);
   pinMode(btnBlower, INPUT_PULLUP);
 
@@ -129,8 +128,8 @@ void GetAllValuesIntervals() {
   }
 }
 void GetTemp() {
-   Temperatura = temperaturaLoop();
-//  int temperatura = random(0, 50);
+  Temperatura = temperaturaLoop();
+  //int temperatura = random(0, 50);
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
     String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
@@ -169,7 +168,7 @@ void GetOxy() {
 
 void GetCon() {
   Conductividad = conductivityLoop();
-//  int randomCon = random(0, 50);
+  //int randomCon = random(0, 50);
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
     String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
@@ -188,8 +187,8 @@ void GetCon() {
 }
 
 void GetPH() {
-  //int ph = random(0, 50);
   ph = phloop();
+//  int ph = random(0, 50);
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
     String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
@@ -405,14 +404,14 @@ void showLocalValues() {
     {
       if (BlowerState) {
         if (ubidots.connected()) {
-          ubidots.add("control1", valorEncendido);
+          ubidots.add("control1", 0);
           ubidots.publish(DEVICE_LABEL);
         }
         digitalWrite(R2, HIGH);
         digitalWrite(R1, HIGH);
       } else {
         if (ubidots.connected()) {
-          ubidots.add("control1", valorApagado);
+          ubidots.add("control1", 1);
           ubidots.publish(DEVICE_LABEL);
         }
         digitalWrite(R1, LOW);
@@ -428,12 +427,10 @@ void showLocalValues() {
   {
     oxygenValue = GetOxygen();
 
-    if (oxygenValue <= minOxy && flag21== false) {
+    if (oxygenValue <= minOxy) {
       digitalWrite(R1, HIGH);
-      activarbocina();
     } else if (oxygenValue >= maxOxy) {
       digitalWrite(R1, LOW);
-      desactivarbocina();
     }
     lcd.setCursor(0, 0);
     lcd.print("Ox:  ");
@@ -454,8 +451,14 @@ void showLocalValues() {
     lcd.setCursor(13, 0);
     lcd.print(Temperatura,2);
 
-    if (Temperatura >= 50) {
-
+    if (Temperatura >= maxTemp && flag21 == false ) {
+      activarbocina();
+    }
+    if (Temperatura <= minTemp && flag21 == false ) {
+      activarbocina();
+    }
+    if (Temperatura >= minTemp && Temperatura <= maxTemp && flag21 == true ) {
+      desactivarbocina();
     }
 
     lcd.setCursor(9, 1);
@@ -480,7 +483,6 @@ void GetAllValues() {
   GetCon();
   GetPH();
 }
-
 void activarbocina() {
   digitalWrite(bocina, HIGH);
   flag21 = true;
@@ -490,6 +492,7 @@ void desactivarbocina() {
   digitalWrite(bocina, LOW);
   flag21 = false;
 }
+
 void printAllPreferences() {
   Serial.println("SSID: " + WIFISSID);
   Serial.println("PASS: " + PASSWORD);
