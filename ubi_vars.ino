@@ -3,7 +3,7 @@ unsigned long timer_conductivity; //Temporizador que lleva el tiempo de vida del
 unsigned long timer_temperature; //Temporizador que lleva el tiempo de vida del programa
 unsigned long timer_oxygen; //Temporizador que lleva el tiempo de vida del programa
 unsigned long timer_ph; //Temporizador que lleva el tiempo de vida del programa
-unsigned long timer_local_check; //Temporizador que lleva el tiempo de vida del programa
+unsigned long timer_local_check = 25000;; //Temporizador que lleva el tiempo de vida del programa
 unsigned long timer_sensors_loop; //Temporizador que lleva el tiempo de vida del programa
 unsigned long timer_to_start_server; //Temporizador que lleva el tiempo de vida del programa
 unsigned long timer_pullup; //Temporizador que lleva el tiempo de vida del programa

@@ -7,12 +7,36 @@ void serverSetup() {
   server.on("/checkDevice", HTTP_GET, [](AsyncWebServerRequest * request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
-    int paramsNr = request->params();
+    
+    json["name"] = deviceName;
+    json["type"] = deviceType;
 
-    json["name"] = String(ssidL);
     serializeJson(json, *response);
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
+  });
+  
+  server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest * request) {
+    
+    File testFile = SD.open("/prueba.csv");
+    //AsyncResponseStream *response = request->beginResponseStream("application/json");
+    //AsyncResponseStream *response = request->beginResponse(testFile, "/oxygen.csv", "text/xhr", true);
+    //AsyncWebServerResponse *response = request->beginChunkedResponse(f);
+    
+    DynamicJsonDocument json(1024);
+    int paramsNr = request->params();
+    if (testFile) {
+      Serial.println("Si existe el archivo");
+    }else{
+      Serial.println("No existe el archivo");
+    }
+    json["name"] = deviceName;
+    json["type"] = deviceType;
+
+    //serializeJson(json, *response);
+    //response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(testFile, "/prueba.csv", "text/xhr", true);
+    //request->send(response);
   });
 
   server.on("/changeParams", HTTP_GET, [](AsyncWebServerRequest * request) {

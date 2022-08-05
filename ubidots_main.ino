@@ -5,12 +5,11 @@
 
 Preferences preferences;
 #define DEVICE_LABEL "agroindustria"
-//#define WIFISSID "INFINITUM4304_2.4" // WifiSSID
-//#define PASSWORD "vxMr7ddEx3"// Password
-//const char *WIFISSID = "Brando's S22 Ultra"; // WifiSSID-Brando's S22 Ultra
-//const char *PASSWORD = "007brando";// Password
+
 String WIFISSID = "";
 String PASSWORD = "";
+String deviceName = "";
+String deviceType = "";
 
 const char *ssidL = "AgroDevice1084";
 const char *passwordL = "agro-007";
@@ -25,8 +24,8 @@ int minPH = 0;
 int maxPH = 0;
 float temp = 0;
 boolean flag21 = false;
-#define TOKEN "BBFF-R2QwDHPW5ap3FLDh2Q8A9Pv9iJXeNn"  //Token relacionado con el dispositivo Ubidots
 
+#define TOKEN "BBFF-R2QwDHPW5ap3FLDh2Q8A9Pv9iJXeNn"  //Token relacionado con el dispositivo Ubidots
 
 float oxygenValue;
 float Conductividad;
@@ -40,6 +39,11 @@ void ubi_mainSetup() {
   PASSWORD = preferences.getString("password");
   preferences.end();
 
+  preferences.begin("data", false);
+  deviceName = preferences.getString("name");
+  deviceType = preferences.getString("type");
+  preferences.end();
+  
   preferences.begin("conductivity", false);
   minConduct = preferences.getUInt("min");
   maxConduct = preferences.getUInt("max");
@@ -60,7 +64,7 @@ void ubi_mainSetup() {
   maxTemp = preferences.getUInt("max");
   preferences.end();
 
-  printAllPreferences();
+  //printAllPreferences();
   pinMode(bocina, OUTPUT);
   pinMode(btnServer, INPUT_PULLUP);
   pinMode(btnBlower, INPUT_PULLUP);
@@ -319,23 +323,23 @@ void Connect() {
   const long interval = 2000;
   WiFi.begin(WIFISSID.c_str(), PASSWORD.c_str());
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("  Conectando a  ");
+  lcd.setCursor(0, 1);
+  lcd.print(WIFISSID);
+ 
   unsigned long currentMillis = millis();
   while (WiFi.status() != WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
     if (abs(millis() - currentMillis) > interval) {
-      /*lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("  Conectando a  ");
-        lcd.setCursor(0, 1);
-        lcd.print(WIFISSID);*/
-      //conectado = false;
       Serial.print(".");
       currentMillis = millis();
-      //break;
     }
-    //ubi_NoConnection();
   }
+  Serial.println(WiFi.localIP());
+  serverSetup();
   while (WiFi.status() == WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
@@ -368,14 +372,13 @@ void showLocalValues() {
     if (!btnServerState) {
       serverSetup();
       //////////
-      WiFi.disconnect();
+      //WiFi.disconnect();
       WiFi.mode(WIFI_AP);
       WiFi.softAP(ssidL, passwordL);
 
       IPAddress IP = WiFi.softAPIP();
-      Serial.print("AP IP address: ");
+      Serial.print("APP IP address: ");
       Serial.println(IP);
-      //server.begin();
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print(" Dispositivo en ");
@@ -468,13 +471,6 @@ void showLocalValues() {
 
     timer_local_check = millis();
   }
-
-  /*
-    if (abs(millis() - timer_sensors_loop) > interval_sensors_loop)
-    {
-
-      timer_sensors_loop = millis();
-    }*/
 }
 
 void GetAllValues() {

@@ -19,10 +19,10 @@ float CONTROL3;  // Name of the variable to be used within the code.*/
 float value;      // To store incoming value.
 uint8_t variable; // To keep track of the state machine and be able to use the switch case.
 #define bocina  0
-#define btnServer 15      //Pin for increment left
+#define btnServer 16      //Pin for increment left
 boolean btnServerState = false;
 
-#define btnBlower 4      //Pin for increment left
+#define btnBlower 14      //Pin for increment left
 boolean btnBlowerState = false;
 boolean BlowerState = false;
 
