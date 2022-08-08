@@ -7,16 +7,16 @@ void serverSetup() {
   server.on("/checkDevice", HTTP_GET, [](AsyncWebServerRequest * request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
-    
+
     json["name"] = deviceName;
     json["type"] = deviceType;
-
+    
     serializeJson(json, *response);
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
-  
-  server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest * request) {
+
+server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest * request) {
     
     File testFile = SD.open("/prueba.csv");
     //AsyncResponseStream *response = request->beginResponseStream("application/json");
@@ -38,7 +38,6 @@ void serverSetup() {
     request->send(testFile, "/prueba.csv", "text/xhr", true);
     //request->send(response);
   });
-
   server.on("/changeParams", HTTP_GET, [](AsyncWebServerRequest * request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
 
