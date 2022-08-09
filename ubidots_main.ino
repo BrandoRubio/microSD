@@ -5,6 +5,7 @@
 
 Preferences preferences;
 #define DEVICE_LABEL "agroindustria"
+
 String WIFISSID = "";
 String PASSWORD = "";
 String deviceName = "";
@@ -23,8 +24,8 @@ int minPH = 0;
 int maxPH = 0;
 float temp = 0;
 boolean flag21 = false;
-#define TOKEN "BBFF-R2QwDHPW5ap3FLDh2Q8A9Pv9iJXeNn"  //Token relacionado con el dispositivo Ubidots
 
+#define TOKEN "BBFF-R2QwDHPW5ap3FLDh2Q8A9Pv9iJXeNn"  //Token relacionado con el dispositivo Ubidots
 
 float oxygenValue;
 float Conductividad;
@@ -37,12 +38,12 @@ void ubi_mainSetup() {
   WIFISSID = preferences.getString("ssid");
   PASSWORD = preferences.getString("password");
   preferences.end();
-  
+
   preferences.begin("data", false);
   deviceName = preferences.getString("name");
   deviceType = preferences.getString("type");
   preferences.end();
-
+  
   preferences.begin("conductivity", false);
   minConduct = preferences.getUInt("min");
   maxConduct = preferences.getUInt("max");
@@ -63,7 +64,7 @@ void ubi_mainSetup() {
   maxTemp = preferences.getUInt("max");
   preferences.end();
 
- // printAllPreferences();
+  //printAllPreferences();
   pinMode(bocina, OUTPUT);
   pinMode(btnServer, INPUT_PULLUP);
   pinMode(btnBlower, INPUT_PULLUP);
@@ -321,28 +322,24 @@ void Connect() {
   GetAllValues();
   const long interval = 2000;
   WiFi.begin(WIFISSID.c_str(), PASSWORD.c_str());
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("  Conectando a  ");
   lcd.setCursor(0, 1);
   lcd.print(WIFISSID);
-
+ 
   unsigned long currentMillis = millis();
   while (WiFi.status() != WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
     if (abs(millis() - currentMillis) > interval) {
-      
-      
       Serial.print(".");
       currentMillis = millis();
-      
     }
-    
   }
   Serial.println(WiFi.localIP());
   serverSetup();
-  
   while (WiFi.status() == WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
@@ -367,12 +364,7 @@ void Connect() {
 void showLocalValues() {
   btnBlowerState = digitalRead(btnBlower);
   btnServerState = digitalRead(btnServer);
-  lcd.setCursor(0, 2);
-  lcd.print("STATUS OD TE TDS PH");
-  if (flag21 == false){
-     lcd.setCursor(0, 3);
-     lcd.print(" OK ");
-    }
+
   if (!btnServerState) {
     timer_to_start_server = millis();
     delay(1000);
@@ -380,12 +372,12 @@ void showLocalValues() {
     if (!btnServerState) {
       serverSetup();
       //////////
-      WiFi.disconnect();
+      //WiFi.disconnect();
       WiFi.mode(WIFI_AP);
       WiFi.softAP(ssidL, passwordL);
 
       IPAddress IP = WiFi.softAPIP();
-      Serial.print("AP IP address: ");
+      Serial.print("APP IP address: ");
       Serial.println(IP);
       lcd.clear();
       lcd.setCursor(0, 0);
@@ -464,17 +456,9 @@ void showLocalValues() {
 
     if (Temperatura >= maxTemp && flag21 == false ) {
       activarbocina();
-      lcd.setCursor(0, 3);
-      lcd.print("    ");
-      lcd.setCursor(10, 3);
-      lcd.print("MX");   
     }
     if (Temperatura <= minTemp && flag21 == false ) {
       activarbocina();
-      lcd.setCursor(0, 3);
-      lcd.print("    ");
-      lcd.setCursor(10, 3);
-      lcd.print("mi");
     }
     if (Temperatura >= minTemp && Temperatura <= maxTemp && flag21 == true ) {
       desactivarbocina();
@@ -484,10 +468,9 @@ void showLocalValues() {
     lcd.print("PH:");
     lcd.setCursor(13, 1);
     lcd.print(ph);
-    
+
     timer_local_check = millis();
   }
-
 }
 
 void GetAllValues() {
