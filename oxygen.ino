@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#define DO_PIN 32
+#define DO_PIN 25
 
 #define VREF 5000    //VREF (mv)
 #define ADC_RES 1024 //ADC Resolution
