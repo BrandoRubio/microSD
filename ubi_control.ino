@@ -3,8 +3,8 @@
 #define VARIABLE_LABEL_SUB_2 "control2"   // Assing the variable label to subscribe
 #define VARIABLE_LABEL_SUB_3 "control3"   // Assing the variable label to subscribe*/
 
-#define R1 13
-#define R2 14
+#define R1 2 // lampara 
+#define R2 4 // blower
 //#define R3 4
 int valorEncendido = 0;
 int valorApagado = 1;
@@ -19,10 +19,10 @@ float CONTROL3;  // Name of the variable to be used within the code.*/
 float value;      // To store incoming value.
 uint8_t variable; // To keep track of the state machine and be able to use the switch case.
 #define bocina  0
-#define btnServer 16      //Pin for increment left
+#define btnServer 17      //Pin for increment left
 boolean btnServerState = false;
 
-#define btnBlower 14      //Pin for increment left
+#define btnBlower 18      //Pin for increment left
 boolean btnBlowerState = false;
 boolean BlowerState = false;
 
@@ -147,7 +147,7 @@ void ubi_controlSetup() {
   pinMode(R2, OUTPUT);
   //pinMode(R3, OUTPUT);
   digitalWrite(bocina, LOW);
-  digitalWrite(R1, LOW);
-  digitalWrite(R2, LOW);
+  digitalWrite(R1, HIGH);
+  digitalWrite(R2, HIGH);
   //digitalWrite(R3, LOW);
 }

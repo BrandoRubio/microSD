@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#define DO_PIN 25
+#define DO_PIN 34 
 
 #define VREF 5000    //VREF (mv)
 #define ADC_RES 1024 //ADC Resolution
@@ -20,10 +20,11 @@
 #define CAL2_T (20)   //℃
 
 const uint16_t DO_Table[41] = {
-    14460, 14220, 13820, 13440, 13090, 12740, 12420, 12110, 11810, 11530,
-    11260, 11010, 10770, 10530, 10300, 10080, 9860, 9660, 9460, 9270,
-    9080, 8900, 8730, 8570, 8410, 8250, 8110, 7960, 7820, 7690,
-    7560, 7430, 7300, 7180, 7070, 6950, 6840, 6730, 6630, 6530, 6410};
+  14460, 14220, 13820, 13440, 13090, 12740, 12420, 12110, 11810, 11530,
+  11260, 11010, 10770, 10530, 10300, 10080, 9860, 9660, 9460, 9270,
+  9080, 8900, 8730, 8570, 8410, 8250, 8110, 7960, 7820, 7690,
+  7560, 7430, 7300, 7180, 7070, 6950, 6840, 6730, 6630, 6530, 6410
+};
 
 uint8_t Temperaturet;
 uint16_t ADC_Raw;
@@ -46,12 +47,12 @@ float GetOxygen()
   Temperaturet = (uint8_t)READ_TEMP;
   ADC_Raw = analogRead(DO_PIN);
   ADC_Voltage = uint32_t(VREF) * ADC_Raw / ADC_RES;
-/*
+  float oxygenN = readDO(ADC_Voltage, Temperaturet) / 2000; 
   Serial.print("Temperaturet:\t" + String(Temperaturet) + "\t");
   Serial.print("ADC RAW:\t" + String(ADC_Raw) + "\t");
   Serial.print("ADC Voltage:\t" + String(ADC_Voltage) + "\t");
-  Serial.println("DO:\t" + String(readDO(ADC_Voltage, Temperaturet)) + "\t");
-*/
-  return readDO(ADC_Voltage, Temperaturet);
-  //return random(0,100);
+  Serial.println("DO:\t" + String(oxygenN) + "\t");
+  //float oxygenN = readDO(ADC_Voltage, Temperaturet) / 2000; 
+  // delay(100);
+  return oxygenN;
 }
