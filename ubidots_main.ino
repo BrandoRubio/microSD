@@ -135,7 +135,7 @@ void GetTemp() {
   //int temperatura = random(0, 50);
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
-    String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
+    String date = now.timestamp(DateTime::TIMESTAMP_FULL);
     String mensaje = String(now.unixtime() + 18000) + "," + date + "," + String(Temperatura) + "\r\n";
     File tempFile = SD.open("/temperature.csv");
     if (tempFile) {
@@ -154,7 +154,7 @@ void GetOxy() {
   oxygenValue = GetOxygen();
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
-    String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
+    String date =  now.timestamp(DateTime::TIMESTAMP_FULL);
     String mensaje = String(now.unixtime() + 18000) + "," + date + "," + String(oxygenValue) + "\r\n";
     File oxiFile = SD.open("/oxygen.csv");
     if (oxiFile) {
@@ -174,7 +174,7 @@ void GetCon() {
   //int randomCon = random(0, 50);
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
-    String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
+    String date =  now.timestamp(DateTime::TIMESTAMP_FULL);
     String mensaje = String(now.unixtime() + 18000) + "," + date + "," + String(Conductividad) + "\r\n";
     File conFile = SD.open("/conductivity.csv");
     if (conFile) {
@@ -194,7 +194,7 @@ void GetPH() {
 //  int ph = random(0, 50);
   if (!ubidots.connected()) {
     DateTime now = rtc.now();
-    String date = String(now.year()) + "/" + String(now.month()) + "/" + String(now.day()) + " - " + String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
+    String date =  now.timestamp(DateTime::TIMESTAMP_FULL);
     String mensaje = String(now.unixtime() + 18000) + "," + date + "," + String(ph) + "\r\n";
     File phFile = SD.open("/ph.csv");
     if (phFile) {
@@ -441,9 +441,11 @@ void showLocalValues() {
     oxygenValue = GetOxygen();
 
     if (oxygenValue <= minOxy) {
-      digitalWrite(R1, HIGH);
-    } else if (oxygenValue >= maxOxy) {
       digitalWrite(R1, LOW);
+      digitalWrite(R2, LOW);
+    } else if (oxygenValue >= maxOxy) {
+      digitalWrite(R1, HIGH);
+      digitalWrite(R2, HIGH);
     }
     lcd.setCursor(0, 0);
     lcd.print("Ox:  ");

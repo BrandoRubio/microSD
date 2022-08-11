@@ -7,7 +7,7 @@ void serverSetup() {
   server.on("/checkDevice", HTTP_GET, [](AsyncWebServerRequest * request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
-    
+
     json["name"] = deviceName;
     json["type"] = deviceType;
 
@@ -15,28 +15,82 @@ void serverSetup() {
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
-  
-  server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest * request) {
-    
-    File testFile = SD.open("/prueba.csv");
-    //AsyncResponseStream *response = request->beginResponseStream("application/json");
-    //AsyncResponseStream *response = request->beginResponse(testFile, "/oxygen.csv", "text/xhr", true);
-    //AsyncWebServerResponse *response = request->beginChunkedResponse(f);
-    
+
+  server.on("/getFileOxygen", HTTP_GET, [](AsyncWebServerRequest * request) {
+
+    File testFile = SD.open("/oxygen1.csv");
+    AsyncWebServerResponse *response = request->beginResponse(testFile, "/oxygen1.csv", "text/xhr", true);
+
     DynamicJsonDocument json(1024);
     int paramsNr = request->params();
     if (testFile) {
       Serial.println("Si existe el archivo");
-    }else{
+    } else {
       Serial.println("No existe el archivo");
     }
     json["name"] = deviceName;
     json["type"] = deviceType;
 
-    //serializeJson(json, *response);
-    //response->addHeader("Access-Control-Allow-Origin", "*");
-    request->send(testFile, "/prueba.csv", "text/xhr", true);
-    //request->send(response);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
+  });
+
+  server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest * request) {
+    int paramsNr = request->params();
+    String fileName = "";
+    for (int i = 0; i < paramsNr; i++) {
+      AsyncWebParameter* p = request->getParam(i);
+      if (p->name() == "file") {
+        fileName = p->value();
+      }
+    }
+    File file = SD.open(fileName);
+    AsyncWebServerResponse *response = request->beginResponse(file, fileName, "text/xhr", true);
+
+    if (file) {
+      Serial.println("Si existe el archivo");
+    } else {
+      Serial.println("No existe el archivo");
+    }
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
+  });
+
+  server.on("/getAllNameFiles", HTTP_GET, [](AsyncWebServerRequest * request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument json(1024);
+
+    File oxygenFile = SD.open("/oxygen.csv");
+    File phFile = SD.open("/ph.csv");
+    File temperatureFile = SD.open("/temperature.csv");
+    File conductivityFile = SD.open("/conductivity.csv");
+    //String archivos = "[";
+    if (oxygenFile) {
+      json["files"].add("oxygen.csv");
+    } else {
+      Serial.println("No existe el archivo oxygen");
+    }
+    if (phFile) {
+      json["files"].add("ph.csv,");
+    } else {
+      Serial.println("No existe el archivo ph");
+    }
+    if (temperatureFile) {
+      json["files"].add("temperature.csv,");
+    } else {
+      Serial.println("No existe el archivo temperature");
+    }
+    if (conductivityFile) {
+      json["files"].add("conductivity.csv");
+    } else {
+      Serial.println("No existe el archivo conductivity");
+    }
+    //archivos += "]";
+    //json["files"] = archivos;
+    json["status"] = "ok";
+    serializeJson(json, *response);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
   });
 
   server.on("/changeParams", HTTP_GET, [](AsyncWebServerRequest * request) {
