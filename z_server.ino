@@ -15,6 +15,57 @@ void serverSetup() {
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
+  
+  server.on("/getAllElementValues", HTTP_GET, [](AsyncWebServerRequest * request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument json(1024);
+
+    json["oxygen"].add(random(0,50));
+    json["oxygen"].add(random(0,50));
+    json["oxygen"].add(random(0,50));
+    json["oxygen"].add(random(0,50));
+    json["oxygen"].add(random(0,50));
+    json["dateOxygen"].add("05:10");
+    json["dateOxygen"].add("05:15");
+    json["dateOxygen"].add("05:20");
+    json["dateOxygen"].add("05:25");
+    json["dateOxygen"].add("05:30");
+    json["temp"].add(random(50,100));
+    json["temp"].add(random(50,100));
+    json["temp"].add(random(50,50));
+    json["temp"].add(random(50,50));
+    json["temp"].add(random(50,50));
+    json["dateTemp"].add("05:10");
+    json["dateTemp"].add("05:15");
+    json["dateTemp"].add("05:20");
+    json["dateTemp"].add("05:25");
+    json["dateTemp"].add("05:30");
+    json["ph"].add(random(150,200));
+    json["ph"].add(random(150,200));
+    json["ph"].add(random(150,200));
+    json["ph"].add(random(150,200));
+    json["ph"].add(random(150,200));
+    json["datePh"].add("05:10");
+    json["datePh"].add("05:15");
+    json["datePh"].add("05:20");
+    json["datePh"].add("05:25");
+    json["datePh"].add("05:30");
+    json["cond"].add(random(250,500));
+    json["cond"].add(random(250,500));
+    json["cond"].add(random(250,500));
+    json["cond"].add(random(250,500));
+    json["cond"].add(random(250,500));
+    json["dateCond"].add("05:10");
+    json["dateCond"].add("05:15");
+    json["dateCond"].add("05:20");
+    json["dateCond"].add("05:25");
+    json["dateCond"].add("05:30");
+    json["status"] = "ok";
+
+    serializeJson(json, *response);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
+  });
 
   server.on("/getFileOxygen", HTTP_GET, [](AsyncWebServerRequest * request) {
 
