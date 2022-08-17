@@ -9,8 +9,8 @@ unsigned long timer_to_start_server; //Temporizador que lleva el tiempo de vida 
 unsigned long timer_pullup; //Temporizador que lleva el tiempo de vida del programa
 
 ////////--------------Intervalos-------------//////////////
-const int interval_conductivity = 300000;
-const int interval_temperature = 300000;
+const int interval_conductivity = 5000;
+const int interval_temperature = 10000;
 const int interval_oxygen = 300000;
 const int interval_ph = 300000;
 const int interval_local_check = 1000;

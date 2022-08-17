@@ -13,7 +13,7 @@ float PH;
 int cont;
 
 float calibration = 15.75; //valor de b para calibración sensor pH //9
-const int analogInPin = 39; //pin sensor pH
+const int analogInPin = 36; //pin sensor pH
 int sensorValue = 0; 
 unsigned long int avgValue; 
 float b;

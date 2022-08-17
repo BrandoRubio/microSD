@@ -4,8 +4,87 @@
 #include <Preferences.h>
 
 Preferences preferences;
-#define DEVICE_LABEL "agroindustria"
-
+#define DEVICE_LABEL "dispositivo_agroendustrial"
+byte customChar[] = { //flecha hacia arriba
+  B00000,
+  B00100,
+  B01110,
+  B10101,
+  B00100,
+  B00100,
+  B00100,
+  B00000
+};
+byte customChar1[] = {//flecha hacia abajo
+  B00000,
+  B00100,
+  B00100,
+  B00100,
+  B10101,
+  B01110,
+  B00100,
+  B00000
+};
+byte wifi[] = {//Wifi
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B10000,
+  B10000,
+  B00000
+};
+byte wifi1[] = {//Wifi
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B01000,
+  B11000,
+  B11000,
+  B00000
+};
+byte wifi2[] = {//Wifi
+  B00000,
+  B00000,
+  B00000,
+  B00100,
+  B01100,
+  B11100,
+  B11100,
+  B00000
+};
+byte wifi3[] = {//Wifi
+  B00000,
+  B00000,
+  B00010,
+  B00110,
+  B01110,
+  B11110,
+  B11110,
+  B00000
+};
+byte wifi4[] = {//Wifi
+  B00000,
+  B00001,
+  B00011,
+  B00111,
+  B01111,
+  B11111,
+  B11111,
+  B00000
+};
+byte wifi5[] = {//NO_Wifi
+  B00000,
+  B10001,
+  B01010,
+  B00100,
+  B01010,
+  B10001,
+  B00000,
+  B00000
+};
 String WIFISSID = "";
 String PASSWORD = "";
 String deviceName = "";
@@ -24,8 +103,11 @@ int minPH = 0;
 int maxPH = 0;
 float temp = 0;
 boolean flag21 = false;
+boolean flag22 = false;
+boolean flag23 = false;
+boolean flag24 = false;
 
-#define TOKEN "BBFF-R2QwDHPW5ap3FLDh2Q8A9Pv9iJXeNn"  //Token relacionado con el dispositivo Ubidots
+#define TOKEN "BBFF-sKey93H2cjEIllE2byhoEXJJYiedHk"  //Token relacionado con el dispositivo Ubidots
 
 float oxygenValue;
 float Conductividad;
@@ -88,6 +170,7 @@ void ubi_mainSetup() {
 }
 
 void ubi_mainLoop() {
+    conexionwifi(); 
   showLocalValues();
   getAllElements();
   ubidots.loop();
@@ -96,6 +179,7 @@ void getAllElements() {
   if (!ubidots.connected())
   {
     ubidots.disconnect();
+    
     Connect();
     for (uint8_t i = 0; i < NUMBER_OF_VARIABLES; i++)
     {
@@ -211,6 +295,7 @@ void ubi_verifyExistFiles() {
   File tempFile = SD.open("/temperature.csv");
   File conFile = SD.open("/conductivity.csv");
   File phFile = SD.open("/ph.csv");
+  lcd.clear();
 
   if (oxyFile) {
     //lcd.clear();
@@ -268,7 +353,7 @@ void ubi_verifyExistFiles() {
     delay(100);
     lcd.clear();
   }
-
+  
   GetAllValues();
 }
 
@@ -327,9 +412,11 @@ void Connect() {
   while (WiFi.status() != WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
+    desconexionwifi();
     if (abs(millis() - currentMillis) > interval) {
       Serial.print(".");
       currentMillis = millis();
+      
     }
   }
   Serial.println(WiFi.localIP());
@@ -337,6 +424,7 @@ void Connect() {
   while (WiFi.status() == WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
+    
     if (abs(millis() - currentMillis) > interval) {
       lcd.clear();
       lcd.setCursor(0, 0);
@@ -358,13 +446,8 @@ void Connect() {
 void showLocalValues() {
   btnBlowerState = digitalRead(btnBlower);
   btnServerState = digitalRead(btnServer);
-  lcd.setCursor(0, 2);
-  lcd.print("STATUS OD TE TDS PH");
+  
   if (flag21 == false) {
-    lcd.setCursor(10, 3);
-    lcd.print("   ");
-    lcd.setCursor(0, 3);
-    lcd.print(" OK ");
   }
   if (!btnServerState) {
     timer_to_start_server = millis();
@@ -432,11 +515,15 @@ void showLocalValues() {
 
   if (abs(millis() - timer_local_check) > interval_local_check)
   {
+    //lcd.clear();
     oxygenValue = GetOxygen();
     if (oxygenValue == 0) {
 
     }else
     if (oxygenValue <= minOxy) {
+      lcd.createChar(1, customChar1);
+      lcd.setCursor(2, 0);
+      lcd.write(1);
       digitalWrite(R1, LOW);
       digitalWrite(R2, LOW);
       BlowerState = false;
@@ -448,6 +535,10 @@ void showLocalValues() {
         ubidots.publish(DEVICE_LABEL);
       }
     } else if (oxygenValue >= maxOxy) {
+      
+      lcd.createChar(0, customChar);
+      lcd.setCursor(2, 0);
+      lcd.write(0);
       digitalWrite(R1, HIGH);
       digitalWrite(R2, HIGH);
       BlowerState = true;
@@ -460,44 +551,61 @@ void showLocalValues() {
       }
     }
     lcd.setCursor(0, 0);
-    lcd.print("Ox:  ");
-    lcd.setCursor(4, 0);
-    lcd.print(oxygenValue);
+    lcd.print("Ox");
+    lcd.setCursor(3, 0);
+    lcd.print(String(oxygenValue) + "   ");
+    
 
     lcd.setCursor(0, 1);
-    lcd.print("Co: ");
-    lcd.setCursor(4, 1);
+    lcd.print("Co");
+    lcd.setCursor(3, 1);
     lcd.print(Conductividad);
 
-    if (tdsValue >= 50) {
+    if (tdsValue <= minConduct ) {
+      lcd.createChar(4, customChar1);
+      lcd.setCursor(2, 1);
+      lcd.write(4);
+    }
+    if (tdsValue >= maxConduct ) {
+      lcd.createChar(3, customChar);
+      lcd.setCursor(2, 1);
+      lcd.write(3);
 
     }
-    lcd.setCursor(9, 0);
-    lcd.print("Te:");
-    lcd.setCursor(13, 0);
+    if (tdsValue >= minConduct && tdsValue <= maxConduct ) {
+      lcd.setCursor(2, 1);
+      lcd.print(" ");
+    }
+    lcd.setCursor(12, 0);
+    lcd.print("Te");
+    lcd.setCursor(15, 0);
     lcd.print(Temperatura, 2);
 
     if (Temperatura >= maxTemp && flag21 == false ) {
       activarbocina();
-      lcd.setCursor(0, 3);
-      lcd.print("    ");
-      lcd.setCursor(10, 3);
-      lcd.print("MX");
+      lcd.setCursor(14, 0);
+      lcd.print(" ");
+      lcd.createChar(0, customChar);
+      lcd.setCursor(14, 0);
+      lcd.write(0);
     }
     if (Temperatura <= minTemp && flag21 == false ) {
       activarbocina();
-      lcd.setCursor(0, 3);
-      lcd.print("    ");
-      lcd.setCursor(10, 3);
-      lcd.print("mi");
+      lcd.setCursor(14, 0);
+      lcd.print(" ");
+      lcd.createChar(1, customChar1);
+      lcd.setCursor(14, 0);
+      lcd.write(1);
     }
     if (Temperatura >= minTemp && Temperatura <= maxTemp && flag21 == true ) {
       desactivarbocina();
+      lcd.setCursor(12, 0);
+      lcd.print(" ");
     }
 
-    lcd.setCursor(9, 1);
-    lcd.print("PH:");
-    lcd.setCursor(13, 1);
+    lcd.setCursor(12, 1);
+    lcd.print("PH");
+    lcd.setCursor(15, 1);
     lcd.print(ph);
 
     timer_local_check = millis();
@@ -520,6 +628,41 @@ void desactivarbocina() {
   digitalWrite(bocina, LOW);
   flag21 = false;
 }
+void conexionwifi(){
+  lcd.createChar(2, wifi);
+  lcd.setCursor(19, 3);
+  lcd.write(2); 
+  delay(500);
+  lcd.createChar(2, wifi1);
+  lcd.setCursor(19, 3);
+  lcd.write(2); 
+  delay(500);   
+  lcd.createChar(2, wifi2);
+  lcd.setCursor(19, 3);
+  lcd.write(2); 
+  delay(500);   
+  lcd.createChar(2, wifi3);
+  lcd.setCursor(19, 3);
+  lcd.write(2); 
+  delay(500);   
+  lcd.createChar(2, wifi4);
+  lcd.setCursor(19, 3);
+  lcd.write(2);
+  delay(500);
+  lcd.setCursor(19, 3);
+  lcd.print(" ");
+  delay(500);
+  }
+void desconexionwifi(){
+  lcd.createChar(2, wifi5);
+  lcd.setCursor(19, 3);
+  lcd.write(2); 
+  delay(500);
+  lcd.setCursor(19, 3);
+  lcd.print(" ");
+  delay(500);   
+}
+
 
 void printAllPreferences() {
   Serial.println("SSID: " + WIFISSID);
