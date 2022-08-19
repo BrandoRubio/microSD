@@ -1,90 +1,7 @@
 #include "UbidotsEsp32Mqtt.h"
 #include "WiFi.h"
 
-#include <Preferences.h>
-
-Preferences preferences;
 #define DEVICE_LABEL "dispositivo_agroendustrial"
-byte customChar[] = { //flecha hacia arriba
-  B00000,
-  B00100,
-  B01110,
-  B10101,
-  B00100,
-  B00100,
-  B00100,
-  B00000
-};
-byte customChar1[] = {//flecha hacia abajo
-  B00000,
-  B00100,
-  B00100,
-  B00100,
-  B10101,
-  B01110,
-  B00100,
-  B00000
-};
-byte wifi[] = {//Wifi
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B10000,
-  B10000,
-  B00000
-};
-byte wifi1[] = {//Wifi
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B01000,
-  B11000,
-  B11000,
-  B00000
-};
-byte wifi2[] = {//Wifi
-  B00000,
-  B00000,
-  B00000,
-  B00100,
-  B01100,
-  B11100,
-  B11100,
-  B00000
-};
-byte wifi3[] = {//Wifi
-  B00000,
-  B00000,
-  B00010,
-  B00110,
-  B01110,
-  B11110,
-  B11110,
-  B00000
-};
-byte wifi4[] = {//Wifi
-  B00000,
-  B00001,
-  B00011,
-  B00111,
-  B01111,
-  B11111,
-  B11111,
-  B00000
-};
-byte wifi5[] = {//NO_Wifi
-  B00000,
-  B10001,
-  B01010,
-  B00100,
-  B01010,
-  B10001,
-  B00000,
-  B00000
-};
 String WIFISSID = "";
 String PASSWORD = "";
 String deviceName = "";
@@ -170,7 +87,7 @@ void ubi_mainSetup() {
 }
 
 void ubi_mainLoop() {
-    conexionwifi(); 
+  conexionwifi();
   showLocalValues();
   getAllElements();
   ubidots.loop();
@@ -179,7 +96,7 @@ void getAllElements() {
   if (!ubidots.connected())
   {
     ubidots.disconnect();
-    
+
     Connect();
     for (uint8_t i = 0; i < NUMBER_OF_VARIABLES; i++)
     {
@@ -208,6 +125,16 @@ void GetAllValuesIntervals() {
   {
     GetPH();
   }
+  if (abs(millis() - timer_ten_minutes) > interval_ten_minutes)
+  {
+    OxygenNewValue(GetOxygen());
+    TempNewValue(temperaturaLoop());
+    ConNewValue(conductivityLoop());
+    PhNewValue(phloop());
+    DateTime nowd = rtc.now();
+    newDateValue(String(nowd.timestamp(DateTime::TIMESTAMP_FULL)));
+    timer_ten_minutes = millis();
+  }
 }
 void GetTemp() {
   Temperatura = temperaturaLoop();
@@ -235,7 +162,7 @@ void GetOxy() {
     DateTime now = rtc.now();
     String date =  now.timestamp(DateTime::TIMESTAMP_FULL);
     String mensaje = String(now.unixtime()) + "," + date + "," + String(oxygenValue) + "\r\n";
-    String mensaje2 = String(now.unixtime()) + "," + date + "," + String(random(0,100)) + "\r\n";
+    String mensaje2 = String(now.unixtime()) + "," + date + "," + String(random(0, 100)) + "\r\n";
     File oxiFile = SD.open("/oxygen.csv");
     if (oxiFile) {
       appendFile(SD, "/test.csv", mensaje2.c_str());
@@ -353,7 +280,7 @@ void ubi_verifyExistFiles() {
     delay(100);
     lcd.clear();
   }
-  
+
   GetAllValues();
 }
 
@@ -416,7 +343,7 @@ void Connect() {
     if (abs(millis() - currentMillis) > interval) {
       Serial.print(".");
       currentMillis = millis();
-      
+
     }
   }
   Serial.println(WiFi.localIP());
@@ -424,7 +351,7 @@ void Connect() {
   while (WiFi.status() == WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
-    
+
     if (abs(millis() - currentMillis) > interval) {
       lcd.clear();
       lcd.setCursor(0, 0);
@@ -446,7 +373,7 @@ void Connect() {
 void showLocalValues() {
   btnBlowerState = digitalRead(btnBlower);
   btnServerState = digitalRead(btnServer);
-  
+
   if (flag21 == false) {
   }
   if (!btnServerState) {
@@ -519,8 +446,7 @@ void showLocalValues() {
     oxygenValue = GetOxygen();
     if (oxygenValue == 0) {
 
-    }else
-    if (oxygenValue <= minOxy) {
+    } else if (oxygenValue <= minOxy) {
       lcd.createChar(1, customChar1);
       lcd.setCursor(2, 0);
       lcd.write(1);
@@ -535,7 +461,7 @@ void showLocalValues() {
         ubidots.publish(DEVICE_LABEL);
       }
     } else if (oxygenValue >= maxOxy) {
-      
+
       lcd.createChar(0, customChar);
       lcd.setCursor(2, 0);
       lcd.write(0);
@@ -554,7 +480,7 @@ void showLocalValues() {
     lcd.print("Ox");
     lcd.setCursor(3, 0);
     lcd.print(String(oxygenValue) + "   ");
-    
+
 
     lcd.setCursor(0, 1);
     lcd.print("Co");
@@ -628,23 +554,23 @@ void desactivarbocina() {
   digitalWrite(bocina, LOW);
   flag21 = false;
 }
-void conexionwifi(){
+void conexionwifi() {
   lcd.createChar(2, wifi);
   lcd.setCursor(19, 3);
-  lcd.write(2); 
+  lcd.write(2);
   delay(500);
   lcd.createChar(2, wifi1);
   lcd.setCursor(19, 3);
-  lcd.write(2); 
-  delay(500);   
+  lcd.write(2);
+  delay(500);
   lcd.createChar(2, wifi2);
   lcd.setCursor(19, 3);
-  lcd.write(2); 
-  delay(500);   
+  lcd.write(2);
+  delay(500);
   lcd.createChar(2, wifi3);
   lcd.setCursor(19, 3);
-  lcd.write(2); 
-  delay(500);   
+  lcd.write(2);
+  delay(500);
   lcd.createChar(2, wifi4);
   lcd.setCursor(19, 3);
   lcd.write(2);
@@ -652,15 +578,15 @@ void conexionwifi(){
   lcd.setCursor(19, 3);
   lcd.print(" ");
   delay(500);
-  }
-void desconexionwifi(){
+}
+void desconexionwifi() {
   lcd.createChar(2, wifi5);
   lcd.setCursor(19, 3);
-  lcd.write(2); 
+  lcd.write(2);
   delay(500);
   lcd.setCursor(19, 3);
   lcd.print(" ");
-  delay(500);   
+  delay(500);
 }
 
 

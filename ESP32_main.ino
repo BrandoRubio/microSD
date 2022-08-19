@@ -1,4 +1,5 @@
-void setup()
+#include <Preferences.h>
+Preferences preferences;void setup()
 {
   Serial.begin(115200);
   lcdSetup();

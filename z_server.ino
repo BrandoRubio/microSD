@@ -16,50 +16,63 @@ void serverSetup() {
     request->send(response);
   });
   
+  server.on("/getLastValues", HTTP_GET, [](AsyncWebServerRequest * request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument json(1024);
+
+    json["oxygen"] = GetOxygen();
+    json["temperature"] = temperaturaLoop();
+    json["conductivity"] = conductivityLoop();
+    json["ph"] = phloop();
+
+    serializeJson(json, *response);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
+  });
+  
   server.on("/getAllElementValues", HTTP_GET, [](AsyncWebServerRequest * request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
-    json["oxygen"].add(random(0,50));
-    json["oxygen"].add(random(0,50));
-    json["oxygen"].add(random(0,50));
-    json["oxygen"].add(random(0,50));
-    json["oxygen"].add(random(0,50));
-    json["dateOxygen"].add("05:10");
-    json["dateOxygen"].add("05:15");
-    json["dateOxygen"].add("05:20");
-    json["dateOxygen"].add("05:25");
-    json["dateOxygen"].add("05:30");
-    json["temp"].add(random(50,100));
-    json["temp"].add(random(50,100));
-    json["temp"].add(random(50,50));
-    json["temp"].add(random(50,50));
-    json["temp"].add(random(50,50));
-    json["dateTemp"].add("05:10");
-    json["dateTemp"].add("05:15");
-    json["dateTemp"].add("05:20");
-    json["dateTemp"].add("05:25");
-    json["dateTemp"].add("05:30");
-    json["ph"].add(random(150,200));
-    json["ph"].add(random(150,200));
-    json["ph"].add(random(150,200));
-    json["ph"].add(random(150,200));
-    json["ph"].add(random(150,200));
-    json["datePh"].add("05:10");
-    json["datePh"].add("05:15");
-    json["datePh"].add("05:20");
-    json["datePh"].add("05:25");
-    json["datePh"].add("05:30");
-    json["cond"].add(random(250,500));
-    json["cond"].add(random(250,500));
-    json["cond"].add(random(250,500));
-    json["cond"].add(random(250,500));
-    json["cond"].add(random(250,500));
-    json["dateCond"].add("05:10");
-    json["dateCond"].add("05:15");
-    json["dateCond"].add("05:20");
-    json["dateCond"].add("05:25");
-    json["dateCond"].add("05:30");
+    preferences.begin("valuesOx", false);
+    json["oxygen"].add(preferences.getFloat("o5"));
+    json["oxygen"].add(preferences.getFloat("o4"));
+    json["oxygen"].add(preferences.getFloat("o3"));
+    json["oxygen"].add(preferences.getFloat("o2"));
+    json["oxygen"].add(preferences.getFloat("o1"));
+    preferences.end();
+    
+    preferences.begin("valuesPh", false);
+    json["ph"].add(preferences.getFloat("ph5"));
+    json["ph"].add(preferences.getFloat("ph4"));
+    json["ph"].add(preferences.getFloat("ph3"));
+    json["ph"].add(preferences.getFloat("ph2"));
+    json["ph"].add(preferences.getFloat("ph1"));
+    preferences.end();
+    
+    preferences.begin("valuesTe", false);
+    json["temp"].add(preferences.getFloat("t5"));
+    json["temp"].add(preferences.getFloat("t4"));
+    json["temp"].add(preferences.getFloat("t3"));
+    json["temp"].add(preferences.getFloat("t2"));
+    json["temp"].add(preferences.getFloat("t1"));
+    preferences.end();
+    
+    preferences.begin("valuesCon", false);
+    json["cond"].add(preferences.getFloat("c5"));
+    json["cond"].add(preferences.getFloat("c4"));
+    json["cond"].add(preferences.getFloat("c3"));
+    json["cond"].add(preferences.getFloat("c2"));
+    json["cond"].add(preferences.getFloat("c1"));
+    preferences.end();
+    
+    preferences.begin("valuesD", false);
+    json["dates"].add(preferences.getString("d1_5"));
+    json["dates"].add(preferences.getString("d1_4"));
+    json["dates"].add(preferences.getString("d1_3"));
+    json["dates"].add(preferences.getString("d1_2"));
+    json["dates"].add(preferences.getString("d1_1"));
+    preferences.end();
     json["status"] = "ok";
 
     serializeJson(json, *response);
