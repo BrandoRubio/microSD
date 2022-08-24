@@ -4,7 +4,7 @@
 AsyncWebServer server(80);
 
 void serverSetup() {
-  server.on("/checkDevice", HTTP_GET, [](AsyncWebServerRequest * request) {
+  server.on("/checkDevice", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
@@ -15,8 +15,8 @@ void serverSetup() {
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
-  
-  server.on("/getLastValues", HTTP_GET, [](AsyncWebServerRequest * request) {
+
+  server.on("/getLastValues", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
@@ -25,12 +25,21 @@ void serverSetup() {
     json["conductivity"] = conductivityLoop();
     json["ph"] = phloop();
 
+    json["minOxy"] = minOxy;
+    json["maxOxy"] = maxOxy;
+    json["minTemp"] = minTemp;
+    json["maxTemp"] = maxTemp;
+    json["minPH"] = minPH;
+    json["maxPH"] = maxPH;
+    json["minConduct"] = minConduct;
+    json["maxConduct"] = maxConduct;
+
     serializeJson(json, *response);
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
-  
-  server.on("/getAllElementValues", HTTP_GET, [](AsyncWebServerRequest * request) {
+
+  server.on("/getAllElementValues", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
@@ -41,7 +50,7 @@ void serverSetup() {
     json["oxygen"].add(preferences.getFloat("o2"));
     json["oxygen"].add(preferences.getFloat("o1"));
     preferences.end();
-    
+
     preferences.begin("valuesPh", false);
     json["ph"].add(preferences.getFloat("ph5"));
     json["ph"].add(preferences.getFloat("ph4"));
@@ -49,7 +58,7 @@ void serverSetup() {
     json["ph"].add(preferences.getFloat("ph2"));
     json["ph"].add(preferences.getFloat("ph1"));
     preferences.end();
-    
+
     preferences.begin("valuesTe", false);
     json["temp"].add(preferences.getFloat("t5"));
     json["temp"].add(preferences.getFloat("t4"));
@@ -57,7 +66,7 @@ void serverSetup() {
     json["temp"].add(preferences.getFloat("t2"));
     json["temp"].add(preferences.getFloat("t1"));
     preferences.end();
-    
+
     preferences.begin("valuesCon", false);
     json["cond"].add(preferences.getFloat("c5"));
     json["cond"].add(preferences.getFloat("c4"));
@@ -65,7 +74,7 @@ void serverSetup() {
     json["cond"].add(preferences.getFloat("c2"));
     json["cond"].add(preferences.getFloat("c1"));
     preferences.end();
-    
+
     preferences.begin("valuesD", false);
     json["dates"].add(preferences.getString("d1_5"));
     json["dates"].add(preferences.getString("d1_4"));
@@ -75,40 +84,30 @@ void serverSetup() {
     preferences.end();
     json["status"] = "ok";
 
+    json["minOxy"] = minOxy;
+    json["maxOxy"] = maxOxy;
+    json["minTemp"] = minTemp;
+    json["maxTemp"] = maxTemp;
+    json["minPH"] = minPH;
+    json["maxPH"] = maxPH;
+    json["minConduct"] = minConduct;
+    json["maxConduct"] = maxConduct;
+
     serializeJson(json, *response);
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
 
-  server.on("/getFileOxygen", HTTP_GET, [](AsyncWebServerRequest * request) {
-
-    File testFile = SD.open("/oxygen1.csv");
-    AsyncWebServerResponse *response = request->beginResponse(testFile, "/oxygen1.csv", "text/xhr", true);
-
-    DynamicJsonDocument json(1024);
-    int paramsNr = request->params();
-    if (testFile) {
-      Serial.println("Si existe el archivo");
-    } else {
-      Serial.println("No existe el archivo");
-    }
-    json["name"] = deviceName;
-    json["type"] = deviceType;
-
-    response->addHeader("Access-Control-Allow-Origin", "*");
-    request->send(response);
-  });
-
-  server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest * request) {
+  server.on("/getFile", HTTP_GET, [](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     String fileName = "";
     for (int i = 0; i < paramsNr; i++) {
-      AsyncWebParameter* p = request->getParam(i);
+      AsyncWebParameter *p = request->getParam(i);
       if (p->name() == "fileName") {
         fileName = p->value();
       }
     }
-    File file = SD.open("/"+fileName);
+    File file = SD.open("/" + fileName);
 
     if (file) {
       Serial.println("Si existe el archivo");
@@ -126,7 +125,7 @@ void serverSetup() {
     }
   });
 
-  server.on("/getAllFileNames", HTTP_GET, [](AsyncWebServerRequest * request) {
+  server.on("/getAllFileNames", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
@@ -168,27 +167,27 @@ void serverSetup() {
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
   });
-  
-  server.on("/emptyFile", HTTP_GET, [](AsyncWebServerRequest * request) {
+
+  server.on("/emptyFile", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
     int paramsNr = request->params();
     String fileName = "";
     for (int i = 0; i < paramsNr; i++) {
-      AsyncWebParameter* p = request->getParam(i);
+      AsyncWebParameter *p = request->getParam(i);
       if (p->name() == "fileName") {
         fileName = "/" + p->value();
       }
     }
-    File file = SD.open("/"+fileName);
+    File file = SD.open("/" + fileName);
 
     if (file) {
       writeFile(SD, fileName.c_str(), "");
       //file.write("");
-      json["status"] =  "Archivo vacío.";
+      json["status"] = "Archivo vacío.";
     } else {
-      json["status"] =  "No existe el archivo.";
+      json["status"] = "No existe el archivo.";
       Serial.println("No existe el archivo oxygen");
     }
     //archivos += "]";
@@ -199,7 +198,7 @@ void serverSetup() {
     request->send(response);
   });
 
-  server.on("/changeParams", HTTP_GET, [](AsyncWebServerRequest * request) {
+  server.on("/changeParams", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
 
     String ssidN = "";
@@ -216,7 +215,7 @@ void serverSetup() {
     DynamicJsonDocument json(1024);
     int paramsNr = request->params();
     for (int i = 0; i < paramsNr; i++) {
-      AsyncWebParameter* p = request->getParam(i);
+      AsyncWebParameter *p = request->getParam(i);
       if (p->name() == "ssid") {
         ssidN = p->value();
       }
@@ -289,11 +288,9 @@ void serverSetup() {
     lcd.print("   dispositivo  ");
     delay(1000);
     ESP.restart();
-
   });
 
-  server.on("/getParams", HTTP_GET, [](AsyncWebServerRequest * request) {
-
+  server.on("/getParams", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
 
@@ -307,6 +304,44 @@ void serverSetup() {
     json["maxTemp"] = String(minTemp);
     json["minPH"] = String(minPH);
     json["maxPH"] = String(maxPH);
+    serializeJson(json, *response);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
+    Serial.println("Params returned");
+  });
+
+  server.on("/getOutOfRangeValues", HTTP_GET, [](AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument json(1024);
+    int contador = 0;
+
+    if (lvOx < minOxy || lvOx > maxOxy) {
+      Serial.println(lvOx);
+      Serial.println(minOxy);
+      json["oxygen"] = lvOx;
+      contador++;
+    }
+    if (lvTe < minTemp || lvTe > maxTemp) {
+      Serial.println(lvTe);
+      Serial.println(minTemp);
+      json["temperature"] = lvTe;
+      contador++;
+    }
+    if (lvCo < minConduct || lvCo > maxConduct) {
+      Serial.println(lvCo);
+      Serial.println(minConduct);
+      json["conductividad"] = lvCo;
+      contador++;
+    }
+    if (lvPh < minPH || lvPh > maxPH) {
+      Serial.println(lvPh);
+      Serial.println(minPH);
+      json["ph"] = lvPh;
+      contador++;
+    }
+
+    json["count"] = contador;
+
     serializeJson(json, *response);
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);
