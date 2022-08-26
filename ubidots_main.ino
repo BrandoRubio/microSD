@@ -58,7 +58,7 @@ void ubi_mainSetup() {
 }
 
 void ubi_mainLoop() {
-  conexionwifi();
+  //conexionwifi();
   showLocalValues();
   getAllElements();
   ubidots.loop();
@@ -75,6 +75,7 @@ void getAllElements() {
     Serial.println("reconectado");
     ubi_verifyExistFiles();
   }
+  conexionwifi();
   GetAllValuesIntervals();
 }
 void GetAllValuesIntervals() {
@@ -298,38 +299,42 @@ void Connect() {
   lcd.print("  Conectando a  ");
   lcd.setCursor(0, 1);
   lcd.print(WIFISSID);*/
-
+  lcd.setCursor(18, 3);
+  lcd.print("  ");
+  desconexionwifi();
   unsigned long currentMillis = millis();
   while (WiFi.status() != WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
-    desconexionwifi();
     if (abs(millis() - currentMillis) > interval) {
       Serial.print(".");
       currentMillis = millis();
     }
   }
-
   Serial.println(WiFi.localIP());
   serverSetup();
   while (WiFi.status() == WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
 
-    /*if (abs(millis() - currentMillis) > interval) {
-      lcd.clear();
+    if (abs(millis() - currentMillis) > interval) {
+      conexionwifi();
+      /*lcd.clear();
       lcd.setCursor(0, 0);
-      lcd.print(" Conexion a red  ");
-      /*if (ubidots.reconnect()) {
+      lcd.print(" Conexion a red  ");*/
+      if (ubidots.reconnect()) {
         break;
       }
+      desconexionwifi();
       currentMillis = millis();
-      lcd.setCursor(0, 1);
-      lcd.print(" sin internet    ");
-    }*/
+      /*lcd.setCursor(0, 1);
+      lcd.print(" sin internet    ");*/
+    }
   }
   delay(500);
-  lcd.clear();
+  //lcd.clear();
+  lcd.setCursor(19, 3);
+  lcd.print(" ");
   //showLocalValues();
   GetAllValues();
 }
@@ -479,32 +484,30 @@ void showLocalValues() {
       lcd.createChar(0, customChar);
       lcd.setCursor(14, 0);
       lcd.write(0);
-    }else
-    if (lvTe <= minTemp && flag21 == false) {
+    } else if (lvTe <= minTemp && flag21 == false) {
       activarbocina();
       lcd.setCursor(14, 0);
       lcd.print(" ");
       lcd.createChar(1, customChar1);
       lcd.setCursor(14, 0);
       lcd.write(1);
-    }else
-    if (lvTe >= minTemp && lvTe <= maxTemp && flag21 == true) {
+    } else if (lvTe >= minTemp && lvTe <= maxTemp && flag21 == true) {
       desactivarbocina();
       lcd.setCursor(14, 0);
       lcd.print(" ");
     }
-    
-    if (lvPh <= minPH){
+
+    if (lvPh <= minPH) {
       lcd.createChar(4, customChar1);
       lcd.setCursor(14, 1);
       lcd.write(4);
-    }else if(lvPh >= maxPH){
+    } else if (lvPh >= maxPH) {
       lcd.createChar(4, customChar);
       lcd.setCursor(14, 1);
       lcd.write(4);
-    }else{
+    } else {
       lcd.setCursor(14, 1);
-      lcd.print(" ");      
+      lcd.print(" ");
     }
 
     lcd.setCursor(12, 1);
@@ -530,31 +533,6 @@ void activarbocina() {
 void desactivarbocina() {
   digitalWrite(bocina, LOW);
   flag21 = false;
-}
-void conexionwifi() {
-  lcd.createChar(2, wifi);
-  lcd.setCursor(19, 3);
-  lcd.write(2);
-  delay(500);
-  lcd.createChar(2, wifi1);
-  lcd.setCursor(19, 3);
-  lcd.write(2);
-  delay(500);
-  lcd.createChar(2, wifi2);
-  lcd.setCursor(19, 3);
-  lcd.write(2);
-  delay(500);
-  lcd.createChar(2, wifi3);
-  lcd.setCursor(19, 3);
-  lcd.write(2);
-  delay(500);
-  lcd.createChar(2, wifi4);
-  lcd.setCursor(19, 3);
-  lcd.write(2);
-  delay(500);
-  lcd.setCursor(19, 3);
-  lcd.print(" ");
-  delay(500);
 }
 void getAllPreferences() {
   preferences.begin("network", false);
@@ -611,12 +589,34 @@ void getAllPreferences() {
   Serial.println("Temperature min: " + String(minTemp));
   Serial.println("Temperature max: " + String(maxTemp));*/
 }
+void conexionwifi() {
+  if (WiFi.RSSI() == 0) {
+    lcd.setCursor(18, 3);
+    lcd.print(" ");
+  } else if (WiFi.RSSI() >= -25) {
+    lcd.createChar(5, wifi1);
+    lcd.setCursor(18, 3);
+    lcd.write(5);
+  } else if (WiFi.RSSI() >= -50) {
+    lcd.createChar(5, wifi2);
+    lcd.setCursor(18, 3);
+    lcd.write(5);
+  } else if (WiFi.RSSI() >= -75) {
+    lcd.createChar(5, wifi3);
+    lcd.setCursor(18, 3);
+    lcd.write(5);
+  } else if (WiFi.RSSI() >= -100){
+    lcd.createChar(5, wifi4);
+    lcd.setCursor(18, 3);
+    lcd.write(5);
+  }
+}
 void desconexionwifi() {
-  lcd.createChar(2, wifi5);
+  lcd.createChar(6, wifi5);
   lcd.setCursor(19, 3);
-  lcd.write(2);
-  delay(500);
+  lcd.write(6);
+  /*delay(500);
   lcd.setCursor(19, 3);
   lcd.print(" ");
-  delay(500);
+  delay(500);*/
 }
