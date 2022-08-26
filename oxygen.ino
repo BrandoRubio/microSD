@@ -55,5 +55,6 @@ float GetOxygen()
   Serial.println("DO:\t" + String(oxygenN) + "\t");*/
   //float oxygenN = readDO(ADC_Voltage, Temperaturet) / 2000; 
   // delay(100);
-  return oxygenN;
+  //return oxygenN;
+  return random(0, 10);
 }
