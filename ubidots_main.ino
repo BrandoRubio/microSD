@@ -312,6 +312,10 @@ void Connect() {
     }
   }
   Serial.println(WiFi.localIP());
+  lcd.setCursor(0,3);
+  lcd.print("IP: ");
+  lcd.setCursor(4,3);
+  lcd.print(WiFi.localIP());
   serverSetup();
   while (WiFi.status() == WL_CONNECTED) {
     showLocalValues();
