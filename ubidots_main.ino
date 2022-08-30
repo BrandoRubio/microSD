@@ -22,9 +22,6 @@ float temp = 0;
 float lvOx, lvTe, lvCo, lvPh = 0;
 
 boolean flag21 = false;
-boolean flag22 = false;
-boolean flag23 = false;
-boolean flag24 = false;
 
 #define TOKEN "BBFF-sKey93H2cjEIllE2byhoEXJJYiedHk"  //Token relacionado con el dispositivo Ubidots
 

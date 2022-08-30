@@ -3,8 +3,8 @@
 #define VARIABLE_LABEL_SUB_2 "control2"   // Assing the variable label to subscribe
 #define VARIABLE_LABEL_SUB_3 "control3"   // Assing the variable label to subscribe*/
 
-#define R1 14 // lampara 
-#define R2 13 // blower
+#define R1 14 // lampara 2 
+#define R2 13 // blower 4
 //#define R3 4
 int valorEncendido = 0;
 int valorApagado = 1;
@@ -18,8 +18,8 @@ float CONTROL3;  // Name of the variable to be used within the code.*/
 
 float value;      // To store incoming value.
 uint8_t variable; // To keep track of the state machine and be able to use the switch case.
-#define bocina  16
-#define btnServer 0      //Pin for increment left
+#define bocina  16  //0 
+#define btnServer 0      //Pin for increment left 16
 boolean btnServerState = false;
 
 #define btnBlower 15      //Pin for increment left
