@@ -301,7 +301,7 @@ void serverSetup() {
     json["minOxy"] = String(minOxy);
     json["maxOxy"] = String(maxOxy);
     json["minTemp"] = String(minTemp);
-    json["maxTemp"] = String(minTemp);
+    json["maxTemp"] = String(maxTemp);
     json["minPH"] = String(minPH);
     json["maxPH"] = String(maxPH);
     serializeJson(json, *response);
