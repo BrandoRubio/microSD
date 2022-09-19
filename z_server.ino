@@ -41,7 +41,7 @@ void serverSetup() {
 
   server.on("/getAllElementValues", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
-    DynamicJsonDocument json(1024);
+    DynamicJsonDocument json(1176);
 
     preferences.begin("valuesOx", false);
     json["oxygen"].add(preferences.getFloat("o5"));
@@ -203,14 +203,14 @@ void serverSetup() {
 
     String ssidN = "";
     String passN = "";
-    int minConductn = 0;
-    int maxConductn = 0;
-    int minOxyn = 0;
-    int maxOxyn = 0;
-    int minTempn = 0;
-    int maxTempn = 0;
-    int minPHn = 0;
-    int maxPHn = 0;
+    int minConductn = minConduct;
+    int maxConductn = maxConduct;
+    int minOxyn = minOxy;
+    int maxOxyn = maxOxy;
+    int minTempn = minTemp;
+    int maxTempn = maxTemp;
+    int minPHn = minPH;
+    int maxPHn = maxPH;
 
     DynamicJsonDocument json(1024);
     int paramsNr = request->params();
