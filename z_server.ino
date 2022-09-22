@@ -128,6 +128,17 @@ void serverSetup() {
   server.on("/getAllFileNames", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(1024);
+    uint8_t cardType = SD.cardType();
+    if (cardType == CARD_NONE) {
+      json["msjsd"] = "Tarjeta SD no encontrada. -- ";
+    } else {
+      json["msjsd"] = "";
+    }
+    if (ubidots.connected()) {
+      json["msjnet"] = "Dispositivo conectado a internet.";
+    } else {
+      json["msjnet"] = "Dispositivo sin conexión a internet.";
+    }
 
     File oxygenFile = SD.open("/oxygen.csv");
     File phFile = SD.open("/ph.csv");

@@ -291,21 +291,25 @@ void Connect() {
   GetAllValues();
   const long interval = 2000;
   WiFi.begin(WIFISSID.c_str(), PASSWORD.c_str());
-  /*lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("  Conectando a  ");
-  lcd.setCursor(0, 1);
-  lcd.print(WIFISSID);*/
   lcd.setCursor(18, 3);
   lcd.print("  ");
   desconexionwifi();
+  int contador = 0;
   unsigned long currentMillis = millis();
   while (WiFi.status() != WL_CONNECTED) {
     showLocalValues();
     GetAllValuesIntervals();
     if (abs(millis() - currentMillis) > interval) {
       Serial.print(".");
+      contador++;
       currentMillis = millis();
+    }
+    if (contador > 5) {
+      WiFi.disconnect();
+      contador = 0;
+      delay(100);
+      WiFi.begin(WIFISSID.c_str(), PASSWORD.c_str());
+      //ESP.restart();
     }
   }
   Serial.println(WiFi.localIP());
