@@ -18,7 +18,7 @@ const int interval_local_check = 1000;
 const int interval_sensors_loop = 20000;
 const int interval_to_start_server = 10000;
 const int interval_pullup = 1000;
-const int interval_save_data = 120000;//600000;//Tiempo para almacenar los valores en la memoria flash
+int interval_save_data = 120000;//600000;//Tiempo para almacenar los valores en la memoria flash
 const int PUBLISH_FREQUENCY = 900000; //Tiempo para subir los valores (15 min)
 const int CHECK_OXYGEN_FRECUENCY = 300000; //Tiempo para checar los valores (5 min)
 
