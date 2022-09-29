@@ -130,14 +130,14 @@ void serverSetup() {
     DynamicJsonDocument json(1024);
     uint8_t cardType = SD.cardType();
     if (cardType == CARD_NONE) {
-      json["msjsd"] = "Tarjeta SD no encontrada. -- ";
+      json["msjsd"] = "No SD.  ";
     } else {
       json["msjsd"] = "";
     }
     if (ubidots.connected()) {
-      json["msjnet"] = "Dispositivo conectado a internet.";
+      json["msjnet"] = "Con Internet";
     } else {
-      json["msjnet"] = "Dispositivo sin conexión a internet.";
+      json["msjnet"] = "Sin internet";
     }
 
     File oxygenFile = SD.open("/oxygen.csv");
@@ -222,6 +222,7 @@ void serverSetup() {
     int maxTempn = maxTemp;
     int minPHn = minPH;
     int maxPHn = maxPH;
+    int interv = interval_save_data;
 
     DynamicJsonDocument json(1024);
     int paramsNr = request->params();
@@ -257,6 +258,12 @@ void serverSetup() {
       if (p->name() == "maxp") {
         maxPHn = p->value().toInt();
       }
+      if (p->name() == "interval") {
+        interv = p->value().toFloat() * 1000 * 60;
+        if (interv < 60000) {
+          interv = 30000;
+        }
+      }
     }
 
     json["status"] = "ok";
@@ -280,6 +287,9 @@ void serverSetup() {
     preferences.begin("temperature", false);
     preferences.putUInt("min", minTempn);
     preferences.putUInt("max", maxTempn);
+    preferences.end();
+    preferences.begin("data", false);
+    preferences.putUInt("interval", interv);
     preferences.end();
     preferences.begin("ph", false);
     preferences.putUInt("min", minPHn);
@@ -315,6 +325,7 @@ void serverSetup() {
     json["maxTemp"] = String(maxTemp);
     json["minPH"] = String(minPH);
     json["maxPH"] = String(maxPH);
+    json["interval"] = float(interval_save_data) / 1000 / 60;
     serializeJson(json, *response);
     response->addHeader("Access-Control-Allow-Origin", "*");
     request->send(response);

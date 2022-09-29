@@ -101,41 +101,45 @@ void GetAllValuesIntervals() {
 void GetTemp() {
   lvTe = temperaturaLoop();
   //int temperatura = random(0, 50);
-  if (!ubidots.connected()) {
-    DateTime now = rtc.now();
-    String date = now.timestamp(DateTime::TIMESTAMP_FULL);
-    String mensaje = String(now.unixtime()) + "," + date + "," + String(lvTe) + "\r\n";
-    File tempFile = SD.open("/temperature.csv");
-    if (tempFile) {
-      appendFile(SD, "/temperature.csv", mensaje.c_str());
+  if (lvTe != -127) {
+    if (!ubidots.connected()) {
+      DateTime now = rtc.now();
+      String date = now.timestamp(DateTime::TIMESTAMP_FULL);
+      String mensaje = String(now.unixtime()) + "," + date + "," + String(lvTe) + "\r\n";
+      File tempFile = SD.open("/temperature.csv");
+      if (tempFile) {
+        appendFile(SD, "/temperature.csv", mensaje.c_str());
+      } else {
+        writeFile(SD, "/temperature.csv", mensaje.c_str());
+      }
     } else {
-      writeFile(SD, "/temperature.csv", mensaje.c_str());
+      ubidots.add("temperature", lvTe);
+      ubidots.publish(DEVICE_LABEL);
     }
-  } else {
-    ubidots.add("temperature", lvTe);
-    ubidots.publish(DEVICE_LABEL);
   }
   timer_temperature = millis();
 }
 
 void GetOxy() {
   lvOx = GetOxygen();
-  if (!ubidots.connected()) {
-    DateTime now = rtc.now();
-    String date = now.timestamp(DateTime::TIMESTAMP_FULL);
-    String mensaje = String(now.unixtime()) + "," + date + "," + String(lvOx) + "\r\n";
-    String mensaje2 = String(now.unixtime()) + "," + date + "," + String(random(0, 100)) + "\r\n";
-    File oxiFile = SD.open("/oxygen.csv");
-    if (oxiFile) {
-      appendFile(SD, "/test.csv", mensaje2.c_str());
-      appendFile(SD, "/oxygen.csv", mensaje.c_str());
+  if (lvOx != 0) {
+    if (!ubidots.connected()) {
+      DateTime now = rtc.now();
+      String date = now.timestamp(DateTime::TIMESTAMP_FULL);
+      String mensaje = String(now.unixtime()) + "," + date + "," + String(lvOx) + "\r\n";
+      String mensaje2 = String(now.unixtime()) + "," + date + "," + String(random(0, 100)) + "\r\n";
+      File oxiFile = SD.open("/oxygen.csv");
+      if (oxiFile) {
+        appendFile(SD, "/test.csv", mensaje2.c_str());
+        appendFile(SD, "/oxygen.csv", mensaje.c_str());
+      } else {
+        appendFile(SD, "/test.csv", mensaje2.c_str());
+        writeFile(SD, "/oxygen.csv", mensaje.c_str());
+      }
     } else {
-      appendFile(SD, "/test.csv", mensaje2.c_str());
-      writeFile(SD, "/oxygen.csv", mensaje.c_str());
+      ubidots.add("oxygen", lvOx);
+      ubidots.publish(DEVICE_LABEL);
     }
-  } else {
-    ubidots.add("oxygen", lvOx);
-    ubidots.publish(DEVICE_LABEL);
   }
   timer_oxygen = millis();
 }
@@ -143,19 +147,21 @@ void GetOxy() {
 void GetCon() {
   lvCo = conductivityLoop();
   //int randomCon = random(0, 50);
-  if (!ubidots.connected()) {
-    DateTime now = rtc.now();
-    String date = now.timestamp(DateTime::TIMESTAMP_FULL);
-    String mensaje = String(now.unixtime()) + "," + date + "," + String(lvCo) + "\r\n";
-    File conFile = SD.open("/conductivity.csv");
-    if (conFile) {
-      appendFile(SD, "/conductivity.csv", mensaje.c_str());
+  if (lvCo != 0) {
+    if (!ubidots.connected()) {
+      DateTime now = rtc.now();
+      String date = now.timestamp(DateTime::TIMESTAMP_FULL);
+      String mensaje = String(now.unixtime()) + "," + date + "," + String(lvCo) + "\r\n";
+      File conFile = SD.open("/conductivity.csv");
+      if (conFile) {
+        appendFile(SD, "/conductivity.csv", mensaje.c_str());
+      } else {
+        writeFile(SD, "/conductivity.csv", mensaje.c_str());
+      }
     } else {
-      writeFile(SD, "/conductivity.csv", mensaje.c_str());
+      ubidots.add("conductivity", lvCo);
+      ubidots.publish(DEVICE_LABEL);
     }
-  } else {
-    ubidots.add("conductivity", lvCo);
-    ubidots.publish(DEVICE_LABEL);
   }
   timer_conductivity = millis();
 }
@@ -163,19 +169,21 @@ void GetCon() {
 void GetPH() {
   lvPh = phloop();
   //  int ph = random(0, 50);
-  if (!ubidots.connected()) {
-    DateTime now = rtc.now();
-    String date = now.timestamp(DateTime::TIMESTAMP_FULL);
-    String mensaje = String(now.unixtime()) + "," + date + "," + String(lvPh) + "\r\n";
-    File phFile = SD.open("/ph.csv");
-    if (phFile) {
-      appendFile(SD, "/ph.csv", mensaje.c_str());
+  if (lvPh != 15.75) {
+    if (!ubidots.connected()) {
+      DateTime now = rtc.now();
+      String date = now.timestamp(DateTime::TIMESTAMP_FULL);
+      String mensaje = String(now.unixtime()) + "," + date + "," + String(lvPh) + "\r\n";
+      File phFile = SD.open("/ph.csv");
+      if (phFile) {
+        appendFile(SD, "/ph.csv", mensaje.c_str());
+      } else {
+        writeFile(SD, "/ph.csv", mensaje.c_str());
+      }
     } else {
-      writeFile(SD, "/ph.csv", mensaje.c_str());
+      ubidots.add("ph", lvPh);
+      ubidots.publish(DEVICE_LABEL);
     }
-  } else {
-    ubidots.add("ph", lvPh);
-    ubidots.publish(DEVICE_LABEL);
   }
   timer_ph = millis();
 }
@@ -313,9 +321,9 @@ void Connect() {
     }
   }
   Serial.println(WiFi.localIP());
-  lcd.setCursor(0,3);
+  lcd.setCursor(0, 3);
   lcd.print("IP: ");
-  lcd.setCursor(4,3);
+  lcd.setCursor(4, 3);
   lcd.print(WiFi.localIP());
   serverSetup();
   while (WiFi.status() == WL_CONNECTED) {
@@ -327,9 +335,9 @@ void Connect() {
       /*lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print(" Conexion a red  ");*/
-      if (ubidots.reconnect()) {
+      /*if (ubidots.reconnect()) {
         break;
-      }
+      }*/
       desconexionwifi();
       currentMillis = millis();
       /*lcd.setCursor(0, 1);
@@ -548,6 +556,7 @@ void getAllPreferences() {
   preferences.begin("data", false);
   deviceName = preferences.getString("name");
   deviceType = preferences.getString("type");
+  interval_save_data = preferences.getUInt("interval");
   preferences.end();
 
   preferences.begin("conductivity", false);
@@ -610,7 +619,7 @@ void conexionwifi() {
     lcd.createChar(5, wifi3);
     lcd.setCursor(18, 3);
     lcd.write(5);
-  } else if (WiFi.RSSI() >= -100){
+  } else if (WiFi.RSSI() >= -100) {
     lcd.createChar(5, wifi4);
     lcd.setCursor(18, 3);
     lcd.write(5);
