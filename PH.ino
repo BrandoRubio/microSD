@@ -49,6 +49,7 @@ float obtenerpH(){
 float phloop()
 {
 
-  PH=obtenerpH();
+  //PH=obtenerpH();
+  PH=random(4,8);
   return PH;
 }

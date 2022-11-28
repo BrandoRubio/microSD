@@ -47,7 +47,8 @@ float GetOxygen()
   Temperaturet = (uint8_t)READ_TEMP;
   ADC_Raw = analogRead(DO_PIN);
   ADC_Voltage = uint32_t(VREF) * ADC_Raw / ADC_RES;
-  float oxygenN = readDO(ADC_Voltage, Temperaturet) / 2000; 
+//  float oxygenN = readDO(ADC_Voltage, Temperaturet) / 2000; 
+  float oxygenN = random(2,12); 
   /*Serial.print("Temperaturet:\t" + String(Temperaturet) + "\t");
   Serial.print("ADC RAW:\t" + String(ADC_Raw) + "\t");
   Serial.print("ADC Voltage:\t" + String(ADC_Voltage) + "\t");

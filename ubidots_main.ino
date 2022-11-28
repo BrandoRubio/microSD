@@ -1,7 +1,7 @@
 #include "UbidotsEsp32Mqtt.h"
 #include "WiFi.h"
 
-#define DEVICE_LABEL "dispositivo_agroendustrial"
+#define DEVICE_LABEL "prueba"
 String WIFISSID = "";
 String PASSWORD = "";
 String deviceName = "";
@@ -23,14 +23,14 @@ float lvOx, lvTe, lvCo, lvPh = 0;
 
 boolean flag21 = false;
 
-#define TOKEN "BBFF-sKey93H2cjEIllE2byhoEXJJYiedHk"  //Token relacionado con el dispositivo Ubidots
+#define TOKEN "BBFF-vumPM2iRw56ECXCE6JhvxWiED5GLyv"  //Token relacionado con el dispositivo Ubidots
 
 float oxygenValue;
 float Conductividad;
 float Temperatura, ph;
 Ubidots ubidots(TOKEN);
 
-void ubi_mainSetup() {
+void () {
 
   getAllPreferences();
   pinMode(bocina, OUTPUT);
@@ -62,6 +62,7 @@ void ubi_mainLoop() {
 }
 void getAllElements() {
   if (!ubidots.connected()) {
+    dataLog("Desconectandose de ubidots", 0);
     ubidots.disconnect();
 
     Connect();
@@ -70,12 +71,14 @@ void getAllElements() {
       delay(100);
     }
     Serial.println("reconectado");
+    dataLog("Reconectandose a ubidots", 0);
     ubi_verifyExistFiles();
   }
   conexionwifi();
   GetAllValuesIntervals();
 }
 void GetAllValuesIntervals() {
+  dataLog("Revisando datos de los sensores", 0);
   if (abs(millis() - timer_oxygen) > interval_oxygen) {
     GetOxy();
   }
@@ -103,6 +106,7 @@ void GetTemp() {
   //int temperatura = random(0, 50);
   if (lvTe != -127) {
     if (!ubidots.connected()) {
+      dataLog("Creando archivo temperatura", 0);
       DateTime now = rtc.now();
       String date = now.timestamp(DateTime::TIMESTAMP_FULL);
       String mensaje = String(now.unixtime()) + "," + date + "," + String(lvTe) + "\r\n";
@@ -115,6 +119,7 @@ void GetTemp() {
     } else {
       ubidots.add("temperature", lvTe);
       ubidots.publish(DEVICE_LABEL);
+      dataLog("Ubidots publicacion de temperatura", 0);
     }
   }
   timer_temperature = millis();
@@ -124,6 +129,7 @@ void GetOxy() {
   lvOx = GetOxygen();
   if (lvOx != 0) {
     if (!ubidots.connected()) {
+      dataLog("Creando archivo de Oxigenacion", 0);
       DateTime now = rtc.now();
       String date = now.timestamp(DateTime::TIMESTAMP_FULL);
       String mensaje = String(now.unixtime()) + "," + date + "," + String(lvOx) + "\r\n";
@@ -139,6 +145,7 @@ void GetOxy() {
     } else {
       ubidots.add("oxygen", lvOx);
       ubidots.publish(DEVICE_LABEL);
+      dataLog("Publicando Oxigenacion", 0);
     }
   }
   timer_oxygen = millis();
@@ -149,6 +156,7 @@ void GetCon() {
   //int randomCon = random(0, 50);
   if (lvCo != 0) {
     if (!ubidots.connected()) {
+      dataLog("Creando archivo Conductividad", 0);
       DateTime now = rtc.now();
       String date = now.timestamp(DateTime::TIMESTAMP_FULL);
       String mensaje = String(now.unixtime()) + "," + date + "," + String(lvCo) + "\r\n";
@@ -161,6 +169,7 @@ void GetCon() {
     } else {
       ubidots.add("conductivity", lvCo);
       ubidots.publish(DEVICE_LABEL);
+      dataLog("Publicando conductividad", 0);
     }
   }
   timer_conductivity = millis();
@@ -171,6 +180,7 @@ void GetPH() {
   //  int ph = random(0, 50);
   if (lvPh != 15.75) {
     if (!ubidots.connected()) {
+      dataLog("Creando archivo de PH", 0);
       DateTime now = rtc.now();
       String date = now.timestamp(DateTime::TIMESTAMP_FULL);
       String mensaje = String(now.unixtime()) + "," + date + "," + String(lvPh) + "\r\n";
@@ -183,11 +193,13 @@ void GetPH() {
     } else {
       ubidots.add("ph", lvPh);
       ubidots.publish(DEVICE_LABEL);
+      dataLog("Publicando PH", 0);
     }
   }
   timer_ph = millis();
 }
 void ubi_verifyExistFiles() {
+  dataLog("Verificando que existan los archivos de los sensores en la SD", 0);
   File oxyFile = SD.open("/oxygen.csv");
   File tempFile = SD.open("/temperature.csv");
   File conFile = SD.open("/conductivity.csv");
@@ -205,6 +217,7 @@ void ubi_verifyExistFiles() {
     lcd.print("      datos     ");
     lcd.setCursor(0, 1);
     lcd.print(" sincronizandos ");
+    dataLog("Sincronizando datos de Oxigenacion", 0);
     delay(100);
     lcd.clear();
   }
@@ -219,6 +232,7 @@ void ubi_verifyExistFiles() {
     lcd.print("      datos     ");
     lcd.setCursor(0, 1);
     lcd.print(" sincronizandos ");
+    dataLog("Sincronizando datos de Temperatura", 0);
     delay(100);
     lcd.clear();
   }
@@ -233,6 +247,7 @@ void ubi_verifyExistFiles() {
     lcd.print("      datos     ");
     lcd.setCursor(0, 1);
     lcd.print(" sincronizandos ");
+    dataLog("Sincronizando archivos de Conductividad", 0);
     delay(100);
     lcd.clear();
   }
@@ -247,6 +262,7 @@ void ubi_verifyExistFiles() {
     lcd.print("      datos     ");
     lcd.setCursor(0, 1);
     lcd.print(" sincronizandos ");
+    dataLog("Sincronizando archivos de PH", 0);
     delay(100);
     lcd.clear();
   }
@@ -298,6 +314,7 @@ void readFileLineByLine(fs::FS &fs, const char *path, const char *var) {
 void Connect() {
   GetAllValues();
   const long interval = 2000;
+  dataLog("Conectandose a  wifi" + String(WIFISSID.c_str()), 0);
   WiFi.begin(WIFISSID.c_str(), PASSWORD.c_str());
   lcd.setCursor(18, 3);
   lcd.print("  ");
@@ -305,9 +322,11 @@ void Connect() {
   int contador = 0;
   unsigned long currentMillis = millis();
   while (WiFi.status() != WL_CONNECTED) {
+    dataLog("No se pudo conectar a red WIFI", 0);
     showLocalValues();
     GetAllValuesIntervals();
     if (abs(millis() - currentMillis) > interval) {
+      dataLog("Intentando conectarse a red WIFI", 0);
       Serial.print(".");
       contador++;
       currentMillis = millis();
@@ -316,12 +335,14 @@ void Connect() {
       WiFi.disconnect();
       contador = 0;
       delay(100);
+      dataLog("Intentando conectarse a Wifi", 0);
       WiFi.begin(WIFISSID.c_str(), PASSWORD.c_str());
       //ESP.restart();
     }
   }
   Serial.println(WiFi.localIP());
   lcd.setCursor(0, 3);
+  dataLog("Conectado a WIFI", 0);
   lcd.print("IP: ");
   lcd.setCursor(4, 3);
   lcd.print(WiFi.localIP());
@@ -431,11 +452,13 @@ void showLocalValues() {
     if (lvOx == 0) {
 
     } else if (lvOx <= minOxy) {
+      dataLog("Oxigenacion en nivel minimo = " + String(lvOx), 0);
       lcd.createChar(1, customChar1);
       lcd.setCursor(2, 0);
       lcd.write(1);
       digitalWrite(R1, LOW);
       digitalWrite(R2, LOW);
+      dataLog("Activacion de blower", 0);
       BlowerState = false;
       Serial.print("Blower ");
       Serial.println(BlowerState);
@@ -445,10 +468,11 @@ void showLocalValues() {
         ubidots.publish(DEVICE_LABEL);
       }
     } else if (lvOx >= maxOxy) {
-
+      dataLog("Oxigenacion en nivel maximo = " + String(lvOx), 0);
       lcd.createChar(0, customChar);
       lcd.setCursor(2, 0);
       lcd.write(0);
+      dataLog("Desactivacion de blower", 0);
       digitalWrite(R1, HIGH);
       digitalWrite(R2, HIGH);
       BlowerState = true;
@@ -464,33 +488,40 @@ void showLocalValues() {
     lcd.print("Ox");
     lcd.setCursor(3, 0);
     lcd.print(String(lvOx) + "  ");
+    dataLog("Mostrando valor de Oxigenacion en LCD", 0);
 
 
     lcd.setCursor(0, 1);
     lcd.print("Co");
     lcd.setCursor(3, 1);
     lcd.print(lvCo);
+    dataLog("Mostrando valor de conductivida en LCD", 0);
 
     if (lvCo <= minConduct) {
+      dataLog("Conductividad al minimo = " + String(lvCo), 0);
       lcd.createChar(4, customChar1);
       lcd.setCursor(2, 1);
       lcd.write(4);
     }
     if (lvCo >= maxConduct) {
+      dataLog("Conductividad al maximo = " + String(lvCo), 0);
       lcd.createChar(3, customChar);
       lcd.setCursor(2, 1);
       lcd.write(3);
     }
     if (lvCo >= minConduct && lvCo <= maxConduct) {
+      dataLog("Conductividad Estable", 0);
       lcd.setCursor(2, 1);
       lcd.print(" ");
     }
     lcd.setCursor(12, 0);
     lcd.print("Te");
     lcd.setCursor(15, 0);
+    dataLog("Mostrando Temperatura en LCD", 0);
     lcd.print(lvTe, 2);
 
     if (lvTe >= maxTemp && flag21 == false) {
+      dataLog("Temeratura alta = " + String(lvTe), 0);
       activarbocina();
       lcd.setCursor(14, 0);
       lcd.print(" ");
@@ -498,6 +529,7 @@ void showLocalValues() {
       lcd.setCursor(14, 0);
       lcd.write(0);
     } else if (lvTe <= minTemp && flag21 == false) {
+      dataLog("Temperatura baja = " + String(lvTe), 0);
       activarbocina();
       lcd.setCursor(14, 0);
       lcd.print(" ");
@@ -505,21 +537,25 @@ void showLocalValues() {
       lcd.setCursor(14, 0);
       lcd.write(1);
     } else if (lvTe >= minTemp && lvTe <= maxTemp && flag21 == true) {
+      dataLog("Temperatura OK", 0);
       desactivarbocina();
       lcd.setCursor(14, 0);
       lcd.print(" ");
     }
 
     if (lvPh <= minPH) {
+      dataLog("PH al minimo = " + String(lvPh), 0);
       lcd.createChar(4, customChar1);
       lcd.setCursor(14, 1);
       lcd.write(4);
     } else if (lvPh >= maxPH) {
+      dataLog("PH al maximo = " + String(lvPh), 0);
       lcd.createChar(4, customChar);
       lcd.setCursor(14, 1);
       lcd.write(4);
     } else {
       lcd.setCursor(14, 1);
+      dataLog("PH OK", 0);
       lcd.print(" ");
     }
 
@@ -533,21 +569,25 @@ void showLocalValues() {
 }
 
 void GetAllValues() {
+
   GetOxy();
   GetTemp();
   GetCon();
   GetPH();
 }
 void activarbocina() {
+  dataLog("Bocina Activada", 0);
   digitalWrite(bocina, HIGH);
   flag21 = true;
 }
 
 void desactivarbocina() {
+  dataLog("Bocina desactivada", 0);
   digitalWrite(bocina, LOW);
   flag21 = false;
 }
 void getAllPreferences() {
+  dataLog("Extraccion de preferencias", 0);
   preferences.begin("network", false);
   WIFISSID = preferences.getString("ssid");
   PASSWORD = preferences.getString("password");

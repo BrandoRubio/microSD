@@ -10,7 +10,8 @@ void setuptemperatura()
 }
 float temperaturaLoop() {
   sensor.requestTemperatures();   //Se envía el comando para leer la temperatura
-  temp1 = sensor.getTempCByIndex(0); //Se obtiene la temperatura en ºC
+  //temp1 = sensor.getTempCByIndex(0); //Se obtiene la temperatura en ºC
+  
+  temp1 = random(0,50); //Se obtiene la temperatura en ºC
   return temp1;
-  //temp = random(0,50); //Se obtiene la temperatura en ºC
 }

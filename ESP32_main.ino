@@ -1,17 +1,19 @@
 #include <Preferences.h>
-Preferences preferences;void setup()
+Preferences preferences;
+void setup()
 {
   Serial.begin(115200);
   lcdSetup();
   setupSD();
   setupClock();
+  Verification();
   setupConductivity();
   setuptemperatura();
   ubi_controlSetup();
   ubi_mainSetup();
 }
 
-void loop()
+| loop()
 {
   ubi_mainLoop();
 }
